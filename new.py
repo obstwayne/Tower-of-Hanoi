@@ -6,6 +6,7 @@ class TowerOfHanoi:
         self.num_discs = num_discs
         self.disks = [[i for i in range(num_discs, 0, -1)], [], []]
         self.selected_disk = None
+        self.selected_stick = None
         self.canvas = tk.Canvas(root, width=600, height=400, bg="white")
         self.canvas.pack()
         self.draw_towers()
@@ -31,7 +32,6 @@ class TowerOfHanoi:
                     y = 350 - (j * 20)
                     self.canvas.create_rectangle(x-size*10, y, x+size*10, y-20, fill="blue", tags="disc")
 
-
     def select_disk(self, event):
         '''Выбор диска'''
         x, y = event.x, event.y
@@ -40,6 +40,8 @@ class TowerOfHanoi:
                 continue
             # Если стержень пуст, идем дальше
             max_size = max(tower, default=0)
+            if max_size is None:
+                max_size = 0
             #левая граница: левая граница стержня - размер самого большого диска * 10(отступ)
             #правая граница: правая граница стержня + размер самого большого диска * 10
             x_range = range(100 + i * 200 - max_size * 10, 100 + i * 200 + max_size * 10)
@@ -48,11 +50,11 @@ class TowerOfHanoi:
             y_range = range(350 - len(tower) * 20, 350)
             if x in x_range and y in y_range:
                 self.selected_disk = tower[-1]
+                self.selected_stick = i  # Сохраняем индекс стержня
                 # Удаляем выбранный диск из стека
                 tower.pop()
                 self.draw_discs()
                 break
-
 
     def move_disk(self, event):
         '''Удаляем выбранный диск и отрисовываем на новых координатах'''
@@ -66,29 +68,31 @@ class TowerOfHanoi:
         x, y = event.x, event.y
         target_tower = (x - 100) // 200
         if 0 <= target_tower < 3:
-            #Выбранный стержень пустой? + (Диск выбран? * (Выбранный стержень доступен? + Выбранный диск < Верхнего диска на выбранном стержне))
-            if not self.disks[target_tower] or (self.selected_disk is not None and (not self.disks[target_tower] or self.selected_disk < self.disks[target_tower][-1])):
+            #Выбранный стержень пустой? + (Диск выбран? * (Выбранный стержень доступен? + Есть ли диск на выбранном стержне(не None) < Размер Верхнего диска на выбранном стержне))
+            if not self.disks[target_tower] or (self.selected_disk is not None and (self.disks[target_tower][-1] is None or self.selected_disk < self.disks[target_tower][-1])):
                 # Добавляем выбранный диск в стержень
                 self.disks[target_tower].append(self.selected_disk)
             else:
                 print("Нельзя положить диск на диск меньшего размера")
+                if self.selected_stick is not None and self.selected_disk is not None:
                 # Возвращаем диск на исходный стержень
-                self.disks[0].append(self.selected_disk)
+                    self.disks[self.selected_stick].append(self.selected_disk)
         else:
             print("Нельзя положить диск вне башни")
+            if self.selected_stick is not None and self.selected_disk is not None:
             # Возвращаем диск на исходный стержень
-            self.disks[0].append(self.selected_disk)
+                self.disks[self.selected_stick].append(self.selected_disk)
         self.selected_disk = None
+        self.selected_stick = None
         self.canvas.delete("selected_disk")
         self.draw_discs()
         if not self.disks[0] and not self.disks[1]:
             print("Победа!")
 
-
 def main():
     root = tk.Tk()
     root.title("Ханойская башня")
-    root.geometry("800x500")
+    root.geometry("800x400")
     game = TowerOfHanoi(root)
     root.mainloop()
 

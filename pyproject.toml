@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "hanoitower"
+version = "0.1.1"
+description = "Realizing game Hanoi Tower"
+authors = ["wayne <kuderge2002@mail.ru>"]
+license = "MIT License"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+Tkinter = "8.6"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
